@@ -27,14 +27,42 @@ function handleVerify(req, res, next){
   res.send('Validation failed, Verify token mismatch');
 }
 
-function receiveMessage(req, res, next){
+var oUsers = {};
+
+function fHouseOrSpare(req, res){
 	var message_instances = req.body.entry[0].messaging;
 	message_instances.forEach(function(instance){
 		var sender = instance.sender.id;
 		if(instance.message && instance.message.text) {
 			var msg_text = instance.message.text;
-			sendMessage(sender, msg_text, true);
+			var sMessage = "Good choice!";
+			sendMessage(sender, sMessage, true);
 		}
+	});
+}
+
+function fBeginning(req, res){
+	var message_instances = req.body.entry[0].messaging;
+	message_instances.forEach(function(instance){
+		var sender = instance.sender.id;
+		if(instance.message && instance.message.text) {
+			var msg_text = instance.message.text;
+			var sMessage = "It is a dark and stormy night. You are driving in the car with your new fiance. All of a sudden you have a flat tire.";
+			sMessage += " Do you change the tire yourself or do you both go to a nearby house?";
+			sendMessage(sender, sMessage, true);
+			oUsers[sender].fNext = fHouseOrSpare;
+		}
+	});
+}
+
+function receiveMessage(req, res){
+	var message_instances = req.body.entry[0].messaging;
+	message_instances.forEach(function(instance){
+		var sender = instance.sender.id;
+		if(!oUsers.hasOwnProperty(sender)){
+			oUsers[sender] = {"fNext":fBeginning};
+		}
+		oUsers[sender].fNext(req, res);
 	});
   res.sendStatus(200);
 }
