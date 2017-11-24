@@ -29,14 +29,67 @@ function handleVerify(req, res, next){
 
 var oUsers = {};
 
+function fMaster(req, res){
+	var message_instances = req.body.entry[0].messaging;
+	message_instances.forEach(function(instance){
+		var sender = instance.sender.id;
+		if(instance.message && instance.message.text) {
+			var msg_text = instance.message.text;
+			var sMessage = "";
+			if(msg_text.toLowerCase().search("master") != -1){
+				sMessage = "The The handyman goes off in search?";
+				oUsers[sender].fNext = fMaster;
+			}else{
+				sMessage = "Good choice!";
+				oUsers[sender].fNext = fBeginning;
+				
+			}
+
+			//sendMessage(sender, sMessage, true);
+			res.end(sMessage);
+		}
+	});
+}
+
+
+function fDoor(req, res){
+	var message_instances = req.body.entry[0].messaging;
+	message_instances.forEach(function(instance){
+		var sender = instance.sender.id;
+		if(instance.message && instance.message.text) {
+			var msg_text = instance.message.text;
+			var sMessage = "";
+			if(msg_text.toLowerCase().search("knock") != -1){
+				sMessage = "The door is opened by a hunchbacked handyman. Do you tell him your story or ask to speak with the master of the house?";
+				oUsers[sender].fNext = fMaster;
+			}else{
+				sMessage = "Good choice!";
+				oUsers[sender].fNext = fBeginning;
+				
+			}
+
+			//sendMessage(sender, sMessage, true);
+			res.end(sMessage);
+		}
+	});
+}
+
 function fHouseOrSpare(req, res){
 	var message_instances = req.body.entry[0].messaging;
 	message_instances.forEach(function(instance){
 		var sender = instance.sender.id;
 		if(instance.message && instance.message.text) {
 			var msg_text = instance.message.text;
-			var sMessage = "Good choice!";
-			sendMessage(sender, sMessage, true);
+			if(msg_text.toLowerCase().search("house") != -1){
+				var sMessage = "You are standing in front of an ornate door. Do you knock or walk in?";
+				oUsers[sender].fNext = fDoor;
+			}else{
+				var sMessage = "Good choice!";
+				oUsers[sender].fNext = fBeginning;
+				
+			}
+			//sendMessage(sender, sMessage, true);
+			res.end(sMessage);
 		}
 	});
 }
@@ -49,7 +102,8 @@ function fBeginning(req, res){
 			var msg_text = instance.message.text;
 			var sMessage = "It is a dark and stormy night. You are driving in the car with your new fiance. All of a sudden you have a flat tire.";
 			sMessage += " Do you change the tire yourself or do you both go to a nearby house?";
-			sendMessage(sender, sMessage, true);
+			//sendMessage(sender, sMessage, true);
+			res.end(sMessage);
 			oUsers[sender].fNext = fHouseOrSpare;
 		}
 	});
